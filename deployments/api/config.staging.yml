@@ -1,0 +1,18 @@
+name: example-api-staging
+port: 8000
+
+environment:
+  ENV_NAME: "staging"
+  LOG_LEVEL: "info"
+
+commands:
+  - "uvicorn app:app --host 0.0.0.0 --port 8000 --workers 2"
+
+dependencies:
+  pypi:
+    fastapi: ""
+    uvicorn: ""
+
+resources:
+  cpu: "1"
+  memory: "1Gi"

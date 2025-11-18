@@ -1,0 +1,20 @@
+name: example-api-production
+port: 8000
+
+environment:
+  ENV_NAME: "production"
+  LOG_LEVEL: "warning"
+
+commands:
+  - "uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4"
+
+dependencies:
+  pypi:
+    fastapi: ""
+    uvicorn: ""
+
+resources:
+  cpu: "2"
+  memory: "2Gi"
+
+replicas: 3
