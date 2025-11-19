@@ -39,7 +39,7 @@ jobs:
       run: |
         python3 -m pip install -U requests
         python3 -m pip install outerbounds pyyaml
-        python3 -m pip install -U ob-project-utils
+        python3 -m pip install -U ob-project-utils==0.2.3rc1
     - name: Configure Outerbounds
       run: |
         PROJECT_NAME=$(yq .project obproject.toml)
