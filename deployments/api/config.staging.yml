@@ -8,6 +8,12 @@ environment:
 commands:
   - "uvicorn app:app --host 0.0.0.0 --port 8000 --workers 2"
 
+auth:
+  type: API
+
+compute_pools:
+  - c5-2x-deployment
+
 dependencies:
   pypi:
     fastapi: ""

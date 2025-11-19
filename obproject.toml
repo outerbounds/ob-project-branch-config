@@ -11,12 +11,12 @@ title = 'Branch-Based Configuration Example'
 
 # Production environment (main branch)
 [environments.production]
-perimeter = "devobproject"
+perimeter = "default"
 deployment_config = "config.prod.yml"
 
 # Staging environment (develop branch)
 [environments.staging]
-perimeter = "devobproject"
+perimeter = "default"
 deployment_config = "config.staging.yml"
 
 # Development environment (feature/* branches and others)

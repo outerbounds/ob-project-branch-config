@@ -6,13 +6,21 @@ environment:
   LOG_LEVEL: "warning"
 
 commands:
-  - "uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4"
+  - "gunicorn --workers 4 --worker-class uvicorn.workers.UvicornWorker --timeout 0 --bind 0.0.0.0:8000 app:app"
 
 dependencies:
   pypi:
     fastapi: ""
+    gunicorn: ""
     uvicorn: ""
+
+compute_pools:
+  - c5-2x-deployment
+
+auth:
+  type: API
 
 resources:
   cpu: "2"
   memory: "2Gi"
+  ephemeralStorage: "2Gi"
