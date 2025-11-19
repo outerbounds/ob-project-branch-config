@@ -1,4 +1,4 @@
-from metaflow import FlowSpec, step
+from metaflow import step
 from obproject import ProjectFlow
 
 class BranchConfigExampleFlow(ProjectFlow):
@@ -8,7 +8,8 @@ class BranchConfigExampleFlow(ProjectFlow):
 
     @step
     def start(self):
-        print("woaaah")
+        print("how now, brown cow.")
+        print("we are running in staging :/")
         self.next(self.end)
 
     @step

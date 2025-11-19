@@ -1,6 +1,6 @@
 platform = 'dev-yellow.outerbounds.xyz'
 project = 'branch_config_example'
-title = 'Branch-Based Configuration Example'
+title = 'Branch-based Configuration Example'
 
 # Map branches to environment names (supports glob patterns)
 [branch_to_environment]
