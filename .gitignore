@@ -12,6 +12,9 @@ venv/
 metaflow_card_cache/
 project_spec.json
 
+# Outerbounds
+**/.ob_apps/
+
 # IDEs
 .vscode/
 .idea/

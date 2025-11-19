@@ -1,4 +1,4 @@
-name: example-api-dev
+name: ex-api-dev
 port: 8000
 
 environment:

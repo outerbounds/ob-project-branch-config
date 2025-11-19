@@ -1,4 +1,4 @@
-name: example-api-production
+name: ex-api-prod
 port: 8000
 
 environment:
@@ -16,5 +16,3 @@ dependencies:
 resources:
   cpu: "2"
   memory: "2Gi"
-
-replicas: 3

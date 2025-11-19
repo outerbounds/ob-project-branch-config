@@ -8,12 +8,12 @@ class BranchConfigExampleFlow(ProjectFlow):
 
     @step
     def start(self):
-        print("Example flow - start")
+        print("woaaah")
         self.next(self.end)
 
     @step
     def end(self):
-        print("Example flow - end")
+        pass
 
 if __name__ == '__main__':
     BranchConfigExampleFlow()

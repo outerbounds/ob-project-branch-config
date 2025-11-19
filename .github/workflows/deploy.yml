@@ -1,0 +1,67 @@
+name: Deploy Project
+on:
+  push:
+    branches:
+    - main
+    - develop
+    - 'feature/**'
+  pull_request:
+    branches:
+    - main
+    - develop
+
+env:
+  GH_HEAD_REF: ${{ github.head_ref }}
+  GH_REF: ${{ github.ref_name }}
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    name: Deploy Project
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.12
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install -U requests
+        python3 -m pip install outerbounds pyyaml
+        python3 -m pip install -U ob-project-utils
+    - name: Configure Outerbounds
+      run: |
+        PROJECT_NAME=$(yq .project obproject.toml)
+        DEFAULT_CICD_USER="${PROJECT_NAME//_/-}-cicd"
+        PLATFORM=$(yq .platform obproject.toml)
+        CICD_USER=$(yq ".cicd_user // \"$DEFAULT_CICD_USER\"")
+        PERIMETER="default"
+        echo "🏗️ Deployment target:"
+        echo "  Platform: $PLATFORM"
+        echo "  CI/CD User: $CICD_USER"
+        echo "  Perimeter: $PERIMETER"
+        outerbounds service-principal-configure \
+          --name $CICD_USER \
+          --deployment-domain $PLATFORM \
+          --perimeter $PERIMETER \
+          --github-actions
+
+    - name: Deploy Project
+      env:
+        COMMIT_URL: "https://github.com/${{ github.repository }}/commit/"
+        CI_URL: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COMMENTS_URL: ${{ github.event.pull_request.comments_url }}
+        PYTHONUNBUFFERED: 1
+      run: obproject-deploy

@@ -1,4 +1,4 @@
-name: example-api-staging
+name: ex-api-staging
 port: 8000
 
 environment:
