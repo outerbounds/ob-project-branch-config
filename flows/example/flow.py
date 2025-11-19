@@ -1,14 +1,15 @@
-from metaflow import FlowSpec, step
+from metaflow import step
 from obproject import ProjectFlow
 
 class BranchConfigExampleFlow(ProjectFlow):
     """
-    A dumb flow.
+    A dumb, stable flow.
     """
 
     @step
     def start(self):
         print("woaaah")
+        print("surfin in the main branch aka --production namespace.")
         self.next(self.end)
 
     @step
