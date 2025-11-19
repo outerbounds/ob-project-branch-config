@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Client for calling the deployed Branch Config Example API.
 
@@ -36,17 +35,8 @@ def get_auth_headers():
     if os.environ.get("METAFLOW_SERVICE_AUTH_KEY"):
         return {"x-api-key": os.environ.get("METAFLOW_SERVICE_AUTH_KEY")}
     from metaflow.metaflow_config import SERVICE_HEADERS
-    
+
     return SERVICE_HEADERS
-
-# Map environments to expected branch names and perimeters
-# This should match your obproject.toml configuration
-ENV_CONFIG = {
-    "production": {"branch": "main", "perimeter": "devobproject"},
-    "staging": {"branch": "develop", "perimeter": "devobproject"},
-    "dev": {"branch": None, "perimeter": "default"},  # Any feature branch
-}
-
 
 def read_obproject_config():
     """Read obproject.toml to get environment configuration"""
@@ -59,10 +49,63 @@ def read_obproject_config():
             return None
 
     try:
-        with open("../../obproject.toml", "r") as f:
-            return toml.loads(f.read())
+        with open("../../obproject.toml", "rb" if hasattr(toml, "load") else "r") as f:
+            if hasattr(toml, "load"):
+                return toml.load(f)  # tomllib (Python 3.11+)
+            else:
+                return toml.loads(f.read())  # toml package
     except FileNotFoundError:
         return None
+
+
+def load_env_config():
+    """
+    Load environment configuration from obproject.toml.
+
+    Reads [branch_to_environment] and [environments.*] sections to build
+    a mapping of environment names to their branch patterns and perimeters.
+
+    Returns dict like:
+    {
+        "production": {"branch": "main", "perimeter": "default"},
+        "staging": {"branch": "develop", "perimeter": "default"},
+        ...
+    }
+    """
+    config = read_obproject_config()
+    if not config:
+        print("⚠️  Warning: Could not read obproject.toml, using default config")
+        return {
+            "production": {"branch": "main", "perimeter": "default"},
+            "staging": {"branch": "develop", "perimeter": "default"},
+            "dev": {"branch": None, "perimeter": "default"},
+        }
+
+    env_config = {}
+    branch_to_env = config.get("branch_to_environment", {})
+    environments = config.get("environments", {})
+
+    # Build environment config by mapping branch patterns to environment settings
+    for env_name, env_settings in environments.items():
+        # Find which branch pattern maps to this environment
+        branch_pattern = None
+        for pattern, env in branch_to_env.items():
+            if env == env_name:
+                # Use the first non-wildcard match as the "main" branch for this env
+                if "*" not in pattern:
+                    branch_pattern = pattern
+                    break
+
+        env_config[env_name] = {
+            "branch": branch_pattern,  # None if only wildcard matches
+            "perimeter": env_settings.get("perimeter", "default")
+        }
+
+    return env_config
+
+
+# Load configuration from obproject.toml at module import time
+ENV_CONFIG = load_env_config()
 
 
 def switch_perimeter(perimeter):
