@@ -1,0 +1,5 @@
+{
+    "message": "Hello from dev environment!",
+    "log_level": "debug",
+    "max_retries": 1
+}

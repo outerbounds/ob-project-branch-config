@@ -1,0 +1,5 @@
+{
+    "message": "Hello from production environment!",
+    "log_level": "warning",
+    "max_retries": 3
+}
