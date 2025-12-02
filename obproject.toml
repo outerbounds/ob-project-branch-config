@@ -1,6 +1,6 @@
 platform = 'dev-yellow.outerbounds.xyz'
 project = 'branch_config_example'
-title = 'Branch-Based Configuration Example'
+title = 'Branch-based Configuration Example'
 
 # Map branches to environment names (supports glob patterns)
 [branch_to_environment]
@@ -14,12 +14,21 @@ title = 'Branch-Based Configuration Example'
 perimeter = "default"
 deployment_config = "config.prod.yml"
 
+[environments.production.flow_configs]
+special_config = "configs/flow.prod.json"
+
 # Staging environment (develop branch)
 [environments.staging]
 perimeter = "default"
 deployment_config = "config.staging.yml"
 
+[environments.staging.flow_configs]
+special_config = "configs/flow.staging.json"
+
 # Development environment (feature/* branches and others)
 [environments.dev]
 perimeter = "default"
 deployment_config = "config.yml"
+
+[environments.dev.flow_configs]
+special_config = "configs/flow.json"

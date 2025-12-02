@@ -1,0 +1,5 @@
+{
+    "message": "Hello from staging environment!",
+    "log_level": "info",
+    "max_retries": 2
+}
