@@ -1,14 +1,12 @@
 name: Deploy Project
 on:
   push:
-    branches:
-    - main
-    - develop
-    - 'feature/**'
+    branches: [main]
   pull_request:
-    branches:
-    - main
-    - develop
+    types: [closed]
+    branches: [main]
+  delete:
+    branches-ignore: [main]
 
 env:
   GH_HEAD_REF: ${{ github.head_ref }}
@@ -21,9 +19,9 @@ permissions:
 
 jobs:
   deploy:
+    if: github.event_name != 'delete' && !(github.event_name == 'pull_request' && github.event.action == 'closed')
     name: Deploy Project
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
       with:
@@ -31,31 +29,19 @@ jobs:
         fetch-depth: 0
 
     - name: Set up Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v5
       with:
-        python-version: 3.12
+        python-version: "3.12"
 
     - name: Install dependencies
-      run: |
-        python3 -m pip install -U requests
-        python3 -m pip install outerbounds pyyaml
-        python3 -m pip install -U ob-project-utils
+      run: pip install outerbounds ob-project-utils
+
     - name: Configure Outerbounds
       run: |
-        PROJECT_NAME=$(yq .project obproject.toml)
-        DEFAULT_CICD_USER="${PROJECT_NAME//_/-}-cicd"
-        PLATFORM=$(yq .platform obproject.toml)
-        CICD_USER=$(yq ".cicd_user // \"$DEFAULT_CICD_USER\"")
-        PERIMETER="default"
-        echo "🏗️ Deployment target:"
-        echo "  Platform: $PLATFORM"
-        echo "  CI/CD User: $CICD_USER"
-        echo "  Perimeter: $PERIMETER"
         outerbounds service-principal-configure \
-          --name $CICD_USER \
-          --deployment-domain $PLATFORM \
-          --perimeter $PERIMETER \
+          --from-obproject-toml \
           --github-actions
+
 
     - name: Deploy Project
       env:
@@ -63,5 +49,47 @@ jobs:
         CI_URL: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COMMENTS_URL: ${{ github.event.pull_request.comments_url }}
-        PYTHONUNBUFFERED: 1
+        PYTHONUNBUFFERED: "1"
       run: obproject-deploy
+
+
+
+  teardown:
+    if: >
+      (github.event_name == 'delete') ||
+      (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true)
+    name: Teardown Branch
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: pip install outerbounds ob-project-utils
+
+
+    - name: Configure Outerbounds
+      run: |
+        outerbounds service-principal-configure \
+          --from-obproject-toml \
+          --github-actions
+
+    - name: Teardown branch resources
+      run: |
+        BRANCH=${{ github.head_ref || github.event.ref }}
+        PROJECT=$(python3 -c "
+        try:
+            import tomllib
+        except ImportError:
+            import toml as tomllib
+        print(tomllib.load(open('obproject.toml','rb'))['project'])
+        ")
+        echo "Tearing down $PROJECT/$BRANCH"
+        outerbounds flowproject teardown-branch \
+          --id "$PROJECT/$BRANCH" --yes -o json

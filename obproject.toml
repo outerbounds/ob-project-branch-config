@@ -32,3 +32,7 @@ deployment_config = "config.yml"
 
 [environments.dev.flow_configs]
 special_config = "configs/flow.json"
+
+[ci]
+platform = "github-actions"
+modules = ["auth", "deploy", "teardown"]
