@@ -55,6 +55,26 @@ python flows/example/flow.py run
 
 Locally, `Config` reads the default path (`configs/flow.json`). Branch-specific resolution only applies when deployed via `obproject-deploy`.
 
+## Verification
+
+After deploy, confirm the system works correctly:
+
+**Flows:**
+- [ ] Trigger BranchConfigExampleFlow on main → stdout shows values from `configs/flow.prod.json` (message: "production", log_level: "WARNING")
+- [ ] Trigger on develop → stdout shows values from `configs/flow.staging.json` (message: "staging", log_level: "INFO")
+- [ ] Trigger on a feature/* branch → stdout shows values from `configs/flow.json` (message: "development", log_level: "DEBUG")
+
+**Deployment:**
+- [ ] API deployment on main uses `config.prod.yml` resources/settings
+- [ ] API deployment on develop uses `config.staging.yml`
+- [ ] API endpoint responds to requests
+
+**Branch isolation:**
+- [ ] Deploy on feature/test branch → verify flow reads dev config, not prod
+- [ ] Teardown feature/test branch after merge → verify Argo resources removed
+
+**How to check:** Trigger runs from Outerbounds UI → click into task → read stdout for config values. For deployments, hit the endpoint URL from the deploy summary.
+
 ## Good to know
 
 - `[branch_to_environment]` uses glob patterns. `"feature/*"` matches `feature/my-thing`. First match wins — put specific patterns before catch-alls.
